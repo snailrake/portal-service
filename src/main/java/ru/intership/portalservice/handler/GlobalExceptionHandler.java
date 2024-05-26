@@ -2,10 +2,16 @@ package ru.intership.portalservice.handler;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.intership.portalservice.exception.*;
+
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestControllerAdvice
@@ -44,5 +50,20 @@ public class GlobalExceptionHandler {
     public ErrorResponse handleUserRegistrationException(UserRegistrationException e) {
         log.error("UserRegistrationException", e);
         return new ErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST.value());
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public Map<String, String> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+        log.error("MethodArgumentNotValidException", e);
+        return getErrorsMap(e);
+    }
+
+    private Map<String, String> getErrorsMap(MethodArgumentNotValidException e) {
+        return e.getBindingResult().getFieldErrors().stream()
+                .collect(Collectors.toMap(
+                        FieldError::getField,
+                        error -> Objects.requireNonNullElse(error.getDefaultMessage(), String.format("Does not satisfy \"%s\" requirements", error.getField()))
+                ));
     }
 }
