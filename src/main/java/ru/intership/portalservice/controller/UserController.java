@@ -38,7 +38,7 @@ public class UserController {
 
     @PatchMapping("/password/regenerated")
     public void resetPassword() {
-        userService.regeneratePassword(userContext.getUserName());
+        userService.setAndSendPassword(userContext.getUserName());
     }
 
     @PutMapping

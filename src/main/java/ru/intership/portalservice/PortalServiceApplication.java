@@ -13,5 +13,4 @@ public class PortalServiceApplication {
     public static void main(String[] args) {
         SpringApplication.run(PortalServiceApplication.class, args);
     }
-
 }

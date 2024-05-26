@@ -42,18 +42,11 @@ public class UserService {
     }
 
     public String registerDriver(String companyInn, UserDto userDto, Set<String> roles) {
-        userValidator.validateUserIsCompanyLogistOrAdmin(companyInn, roles);
-        String userId = registerUserInCompany(companyInn, userDto);
-        assignRoleToUser(companyInn, userDto.getEmail(), UserRole.DRIVER.name());
-        return userId;
+        return registerCompanyMember(companyInn, userDto, UserRole.DRIVER.name(), roles);
     }
 
     public void resetPassword(String userName, ResetPasswordDto resetPasswordDto) {
         keycloakService.addPasswordByUsername(userName, resetPasswordDto.getPassword());
-    }
-
-    public void regeneratePassword(String userName) {
-        setAndSendPassword(userName);
     }
 
     public UserDto updateUserInfo(String username, UserDto userDto) {
@@ -72,6 +65,12 @@ public class UserService {
                         .roles(keycloakService.getUserCompanyRoles(companyId, user.getUsername()))
                         .build())
                 .toList();
+    }
+
+    public void setAndSendPassword(String email) {
+        String password = passwordService.generate();
+        keycloakService.addPasswordByUsername(email, password);
+        mailService.sendNewPasswordMail(email, password);
     }
 
     private String registerUserInCompany(String companyInn, UserDto userDto) {
@@ -99,11 +98,5 @@ public class UserService {
         }
         keycloakService.assignRoleToUser(username, companyInn + UserRole.valueOf(role).name());
         log.info("User {} received {} role in {} company", username, role, companyInn);
-    }
-
-    private void setAndSendPassword(String email) {
-        String password = passwordService.generate();
-        keycloakService.addPasswordByUsername(email, password);
-        mailService.sendNewPasswordMail(email, password);
     }
 }
