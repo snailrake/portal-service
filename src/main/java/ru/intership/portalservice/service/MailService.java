@@ -1,11 +1,13 @@
 package ru.intership.portalservice.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MailService {
@@ -26,6 +28,7 @@ public class MailService {
         message.setSubject(subject);
         message.setText(text);
         javaMailSender.send(message);
+        log.info("Mail sent {}", message);
     }
 
     private String getPasswordMsg(String password) {

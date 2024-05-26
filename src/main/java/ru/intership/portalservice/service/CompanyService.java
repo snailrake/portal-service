@@ -2,21 +2,24 @@ package ru.intership.portalservice.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.intership.portalservice.dto.CompanyCardDto;
 import ru.intership.portalservice.dto.CompanyShortDto;
 import ru.intership.portalservice.dto.client.company.CompanyInfo;
-import ru.intership.portalservice.exception.CompanyRegistrationException;
 import ru.intership.portalservice.mapper.CompanyMapper;
 import ru.intership.portalservice.model.Company;
 import ru.intership.portalservice.model.UserRole;
 import ru.intership.portalservice.repository.CompanyRepository;
+import ru.intership.portalservice.validator.CompanyValidator;
+import ru.intership.portalservice.validator.UserValidator;
 
 import java.util.List;
 import java.util.Set;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CompanyService {
@@ -25,26 +28,19 @@ public class CompanyService {
     private final DadataService dadataService;
     private final CompanyRepository companyRepository;
     private final CompanyMapper companyMapper;
-    private final UserService userService;
+    private final UserValidator userValidator;
+    private final CompanyValidator companyValidator;
 
     @Transactional
     public String registerCompany(String username, String companyInn) {
-        if (keycloakService.isGroupExists(companyInn)) {
-            throw new CompanyRegistrationException(String.format("Company %s already in registry", companyInn));
-        }
+        companyValidator.validateGroupNotExists(companyInn);
         String companyId = keycloakService.registerGroup(companyInn);
-        if (!keycloakService.isRoleExists(companyInn)) {
-            keycloakService.registerRole(companyInn);
-        }
-        keycloakService.joinToGroup(companyId, username);
-        keycloakService.assignRoleToGroup(companyId, companyInn);
-        if (!keycloakService.isRoleExists(companyInn + UserRole.ADMIN.name())) {
-            keycloakService.registerRole(companyInn + UserRole.ADMIN.name());
-        }
-        keycloakService.assignRoleToUser(username, UserRole.ADMIN.name());
-        keycloakService.assignRoleToUser(username, companyInn + UserRole.ADMIN.name());
+        log.info("Registered company with id: {}", companyId);
+        addUserToCompany(companyInn, companyId, username);
+        assignRolesToUser(username, companyInn, UserRole.ADMIN.name());
         CompanyInfo companyInfo = dadataService.getCompanyInfo(companyInn);
         companyRepository.save(companyMapper.toCompany(companyInfo));
+        log.info("Company info saved: {}", companyInfo);
         return companyId;
     }
 
@@ -56,7 +52,7 @@ public class CompanyService {
 
     @Transactional(readOnly = true)
     public CompanyCardDto getCompanyCard(String companyInn, Set<String> roles) {
-        userService.validateUserIsAdmin(roles);
+        userValidator.validateUserIsAdmin(roles);
         Company company = getCompanyById(companyInn);
         long logistCount = keycloakService.findUsersByRole(companyInn + UserRole.LOGIST.name()).size();
         long driverCount = keycloakService.findUsersByRole(companyInn + UserRole.DRIVER.name()).size();
@@ -67,5 +63,19 @@ public class CompanyService {
     public List<CompanyShortDto> getAllCompaniesShort(int page, int size) {
         List<Company> companies = companyRepository.findAll(PageRequest.of(page, size)).getContent();
         return companyMapper.toShortDto(companies);
+    }
+
+    private void addUserToCompany(String companyInn, String companyId, String username) {
+        if (!keycloakService.isRoleExists(companyInn)) keycloakService.registerRole(companyInn);
+        keycloakService.joinToGroup(companyId, username);
+        keycloakService.assignRoleToGroup(companyId, companyInn);
+    }
+
+    private void assignRolesToUser(String username, String companyInn, String role) {
+        if (!keycloakService.isRoleExists(companyInn + role)) {
+            keycloakService.registerRole(companyInn + role);
+        }
+        keycloakService.assignRoleToUser(username, role);
+        keycloakService.assignRoleToUser(username, companyInn + role);
     }
 }

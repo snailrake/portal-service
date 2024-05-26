@@ -14,7 +14,7 @@ public class RoleService {
     public List<String> getAllRoles() {
         return Arrays.stream(UserRole.values())
                 .map(Enum::name)
-                .filter(name -> !name.equalsIgnoreCase("REGISTRATOR"))
+                .filter(name -> !name.equalsIgnoreCase(UserRole.REGISTRATOR.name()))
                 .toList();
     }
 }
