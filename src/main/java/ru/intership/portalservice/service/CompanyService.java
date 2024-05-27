@@ -33,15 +33,20 @@ public class CompanyService {
 
     @Transactional
     public String registerCompany(String username, String companyInn) {
-        companyValidator.validateGroupNotExists(companyInn);
-        CompanyInfo companyInfo = dadataService.getCompanyInfo(companyInn);
-        String companyId = keycloakService.registerGroup(companyInn);
-        log.info("Registered company with id: {}", companyId);
-        addUserToCompany(companyInn, companyId, username);
-        assignRolesToUser(username, companyInn, UserRole.ADMIN.name());
-        companyRepository.save(companyMapper.toCompany(companyInfo));
-        log.info("Company info saved: {}", companyInfo);
-        return companyId;
+        try {
+            companyValidator.validateGroupNotExists(companyInn);
+            CompanyInfo companyInfo = dadataService.getCompanyInfo(companyInn);
+            String companyId = keycloakService.registerGroup(companyInn);
+            log.info("Registered company with id: {}", companyId);
+            addUserToCompany(companyInn, companyId, username);
+            assignRolesToUser(username, companyInn, UserRole.ADMIN.name());
+            companyRepository.save(companyMapper.toCompany(companyInfo));
+            log.info("Company info saved: {}", companyInfo);
+            return companyId;
+        } catch (RuntimeException e) {
+            keycloakService.unregisterGroup(companyInn);
+            throw e;
+        }
     }
 
     @Transactional(readOnly = true)

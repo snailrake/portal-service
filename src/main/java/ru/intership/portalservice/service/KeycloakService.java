@@ -122,6 +122,11 @@ public class KeycloakService {
         }
     }
 
+    public void unregisterGroup(String name) {
+        String groupId = findGroupId(name);
+        realm.groups().group(groupId).remove();
+    }
+
     public void joinToGroup(String groupId, String username) {
         UserRepresentation user = realm.users().search(username, true)
                 .get(0);
