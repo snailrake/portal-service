@@ -185,6 +185,16 @@ public class KeycloakService {
         return roleResource.getUserMembers();
     }
 
+    public void deleteRole(String role) {
+        realm.clients().get(clientId).roles().deleteRole(role);
+    }
+
+    public void unassignUserRole(String userId, String role) {
+        RoleRepresentation clientRole = realm.clients().get(clientId).roles().get(role).toRepresentation();
+        UserResource userResource = realm.users().get(userId);
+        userResource.roles().clientLevel(clientId).remove(Collections.singletonList(clientRole));
+    }
+
     private Optional<GroupRepresentation> findGroupByName(String name) {
         List<GroupRepresentation> groups = realm.groups().groups().stream()
                 .filter(g -> g.getName().equalsIgnoreCase(name))

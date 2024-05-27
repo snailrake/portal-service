@@ -1,43 +1,19 @@
 package ru.intership.portalservice.config.context;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.annotation.RequestScope;
 
 import java.util.Set;
 
+@Getter
+@Setter
 @Component
+@RequestScope
 public class UserContext {
 
-    private final ThreadLocal<String> userIdHolder = new ThreadLocal<>();
-    private final ThreadLocal<String> userNameHolder = new ThreadLocal<>();
-    private final ThreadLocal<Set<String>> userRolesHolder = new ThreadLocal<>();
-
-    public void setUserRoles(Set<String> userRoles) {
-        userRolesHolder.set(userRoles);
-    }
-
-    public void setUserId(String userId) {
-        userIdHolder.set(userId);
-    }
-
-    public void setUserName(String userName) {
-        userNameHolder.set(userName);
-    }
-
-    public String getUserId() {
-        return userIdHolder.get();
-    }
-
-    public String getUserName() {
-        return userNameHolder.get();
-    }
-
-    public Set<String> getUserRoles() {
-        return userRolesHolder.get();
-    }
-
-    public void clear() {
-        userIdHolder.remove();
-        userNameHolder.remove();
-        userRolesHolder.remove();
-    }
+    private String userId;
+    private String userName;
+    private Set<String> userRoles;
 }

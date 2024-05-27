@@ -23,7 +23,7 @@ public class CompanyController {
 
     @PostMapping
     public String registerCompany(@RequestParam String companyInn) {
-        return companyService.registerCompany(userContext.getUserName(), companyInn);
+        return companyService.registerCompany(userContext.getUserId(), userContext.getUserName(), companyInn);
     }
 
     @GetMapping("/{companyInn}")

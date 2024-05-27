@@ -61,7 +61,7 @@ public class CompanyServiceTest {
         when(dadataService.getCompanyInfo(anyString())).thenReturn(new CompanyInfo());
         when(keycloakService.registerGroup(anyString())).thenReturn(expectedCompanyId);
 
-        String actualCompanyId = companyService.registerCompany(username, companyInn);
+        String actualCompanyId = companyService.registerCompany("", username, companyInn);
 
         assertEquals(expectedCompanyId, actualCompanyId);
         verify(companyValidator, times(1)).validateGroupNotExists(anyString());

@@ -32,7 +32,7 @@ public class CompanyService {
     private final CompanyValidator companyValidator;
 
     @Transactional
-    public String registerCompany(String username, String companyInn) {
+    public String registerCompany(String userId, String username, String companyInn) {
         try {
             companyValidator.validateGroupNotExists(companyInn);
             CompanyInfo companyInfo = dadataService.getCompanyInfo(companyInn);
@@ -44,7 +44,7 @@ public class CompanyService {
             log.info("Company info saved: {}", companyInfo);
             return companyId;
         } catch (RuntimeException e) {
-            keycloakService.unregisterGroup(companyInn);
+            companyRegisterKeycloakRollback(userId, companyInn);
             throw e;
         }
     }
@@ -82,5 +82,13 @@ public class CompanyService {
         }
         keycloakService.assignRoleToUser(username, role);
         keycloakService.assignRoleToUser(username, companyInn + role);
+    }
+
+    private void companyRegisterKeycloakRollback(String userId, String companyInn) {
+        keycloakService.unregisterGroup(companyInn);
+        keycloakService.deleteRole(companyInn);
+        keycloakService.deleteRole(companyInn + UserRole.ADMIN.name());
+        keycloakService.unassignUserRole(userId, companyInn);
+        keycloakService.unassignUserRole(userId, companyInn + UserRole.ADMIN.name());
     }
 }

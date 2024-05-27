@@ -8,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
@@ -18,26 +17,17 @@ public class UserHeaderFilter implements Filter {
     private final ObjectMapper objectMapper;
 
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-            throws ServletException, IOException {
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws ServletException, IOException {
         HttpServletRequest req = (HttpServletRequest) request;
         String userId = req.getHeader("x-user-id");
         String userName = req.getHeader("x-user-name");
         String userRoles = req.getHeader("x-user-roles");
-        if (userId != null) {
-            userContext.setUserId(userId);
-        }
-        if (userName != null) {
-            userContext.setUserName(userName);
-        }
+        if (userId != null) userContext.setUserId(userId);
+        if (userName != null) userContext.setUserName(userName);
         if (userRoles != null) {
-            userContext.setUserRoles(objectMapper.readValue(userRoles, new TypeReference<Set<String>>() {
+            userContext.setUserRoles(objectMapper.readValue(userRoles, new TypeReference<>() {
             }));
         }
-        try {
-            chain.doFilter(request, response);
-        } finally {
-            userContext.clear();
-        }
+        chain.doFilter(request, response);
     }
 }
