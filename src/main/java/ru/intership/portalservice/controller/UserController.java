@@ -3,7 +3,7 @@ package ru.intership.portalservice.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import ru.intership.portalservice.config.context.UserContext;
+import ru.intership.common.UserContext;
 import ru.intership.portalservice.dto.ResetPasswordDto;
 import ru.intership.portalservice.dto.UserDto;
 import ru.intership.portalservice.dto.UserShortDto;
