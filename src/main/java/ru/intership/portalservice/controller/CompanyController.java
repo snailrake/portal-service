@@ -5,10 +5,10 @@ import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.intership.common.UserContext;
 import ru.intership.portalservice.dto.CompanyCardDto;
 import ru.intership.portalservice.dto.CompanyShortDto;
 import ru.intership.portalservice.service.CompanyService;
+import ru.intership.webcommonspringbootstarter.UserContext;
 
 import java.util.List;
 

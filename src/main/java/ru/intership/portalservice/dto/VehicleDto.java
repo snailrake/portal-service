@@ -23,4 +23,8 @@ public class VehicleDto {
 
     @Positive
     private String companyInn;
+
+    @NotNull
+    @Size(min = 6, max = 10)
+    private String licensePlate;
 }

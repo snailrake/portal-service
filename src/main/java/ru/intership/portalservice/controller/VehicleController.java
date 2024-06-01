@@ -2,9 +2,9 @@ package ru.intership.portalservice.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import ru.intership.common.UserContext;
 import ru.intership.portalservice.dto.VehicleDto;
 import ru.intership.portalservice.service.VehicleService;
+import ru.intership.webcommonspringbootstarter.UserContext;
 
 @RestController
 @RequestMapping("/vehicle")

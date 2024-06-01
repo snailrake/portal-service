@@ -24,4 +24,7 @@ public class Vehicle {
     @ManyToOne
     @JoinColumn(name = "company_inn")
     private Company company;
+
+    @Column(name = "license_plate", nullable = false)
+    private String licensePlate;
 }

@@ -58,7 +58,7 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok")
     implementation("org.mapstruct:mapstruct:1.5.3.Final")
     annotationProcessor("org.mapstruct:mapstruct-processor:1.5.3.Final")
-    implementation("ru.intership:common:0.0.1-SNAPSHOT")
+    implementation("ru.intership:web-common-spring-boot-starter:0.0.1-SNAPSHOT")
 }
 
 tasks.withType<Test> {
