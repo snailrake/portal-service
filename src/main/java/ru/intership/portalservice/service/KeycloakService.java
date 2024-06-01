@@ -195,6 +195,19 @@ public class KeycloakService {
         userResource.roles().clientLevel(clientId).remove(Collections.singletonList(clientRole));
     }
 
+    public void removeUserByUsername(String username) {
+        String userId = findUserId(username)
+                .orElseThrow(() -> new KeycloakEntityNotFoundException(String.format("User %s not found", username)));
+        UserResource userResource = findUserResourceById(userId)
+                .orElseThrow(() -> new KeycloakEntityNotFoundException(String.format("User %s not found", username)));
+        userResource.remove();
+    }
+
+    public Optional<UserRepresentation> findUserByUsername(String username) {
+        return realm.users().search(username, true).stream()
+                .findFirst();
+    }
+
     private Optional<GroupRepresentation> findGroupByName(String name) {
         List<GroupRepresentation> groups = realm.groups().groups().stream()
                 .filter(g -> g.getName().equalsIgnoreCase(name))
@@ -208,11 +221,6 @@ public class KeycloakService {
 
     private Optional<UserResource> findUserResourceById(String userId) {
         return Optional.of(realm.users().get(userId));
-    }
-
-    private Optional<UserRepresentation> findUserByUsername(String username) {
-        return realm.users().search(username, true).stream()
-                .findFirst();
     }
 
     private GroupRepresentation getGroupRepresentation(String group) {

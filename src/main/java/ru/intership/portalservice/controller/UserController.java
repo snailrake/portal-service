@@ -3,11 +3,11 @@ package ru.intership.portalservice.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import ru.intership.common.UserContext;
 import ru.intership.portalservice.dto.ResetPasswordDto;
 import ru.intership.portalservice.dto.UserDto;
 import ru.intership.portalservice.dto.UserShortDto;
 import ru.intership.portalservice.service.UserService;
+import ru.intership.webcommonspringbootstarter.UserContext;
 
 import java.util.List;
 
@@ -55,5 +55,10 @@ public class UserController {
     @GetMapping("/company/{companyInn}")
     public List<UserShortDto> getUsersInCompany(@PathVariable String companyInn) {
         return userService.getUsersInCompany(companyInn, userContext.getUserRoles());
+    }
+
+    @GetMapping
+    public UserDto getUserByUsername(@RequestParam String username) {
+        return userService.getUserByUsername(username);
     }
 }

@@ -1,3 +1,5 @@
 databaseChangeLog:
   - include:
       file: db/changelog/changeset/company_V001__initial.sql
+  - include:
+      file: db/changelog/changeset/vehicle_V002__plate.sql

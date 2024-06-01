@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import ru.intership.portalservice.dto.ResetPasswordDto;
 import ru.intership.portalservice.dto.UserDto;
 import ru.intership.portalservice.dto.UserShortDto;
+import ru.intership.portalservice.exception.KeycloakEntityNotFoundException;
 import ru.intership.portalservice.mapper.UserMapper;
 import ru.intership.portalservice.model.UserRole;
 import ru.intership.portalservice.validator.UserValidator;
@@ -26,19 +27,30 @@ public class UserService {
     private final UserValidator userValidator;
 
     public String registerCompanyOwner(UserDto userDto) {
-        UserRepresentation userRepresentation = userMapper.toUserRepresentation(userDto);
-        String userId = keycloakService.registerUser(userRepresentation);
-        log.info("Registered company owner: " + userId);
-        keycloakService.assignRoleToUser(userRepresentation.getUsername(), UserRole.REGISTRATOR.name());
-        setAndSendPassword(userRepresentation.getEmail());
-        return userId;
+        try {
+            UserRepresentation userRepresentation = userMapper.toUserRepresentation(userDto);
+            String userId = keycloakService.registerUser(userRepresentation);
+            log.info("Registered company owner: " + userId);
+            keycloakService.assignRoleToUser(userRepresentation.getUsername(), UserRole.REGISTRATOR.name());
+            setAndSendPassword(userRepresentation.getEmail());
+            return userId;
+        } catch (RuntimeException e) {
+            keycloakService.removeUserByUsername(userDto.getEmail());
+            throw e;
+        }
     }
 
     public String registerCompanyMember(String companyInn, UserDto userDto, String role, Set<String> roles) {
-        userValidator.validateUserIsCompanyAdmin(companyInn, roles);
-        String userId = registerUserInCompany(companyInn, userDto);
-        assignRoleToUser(companyInn, userDto.getEmail(), role);
-        return userId;
+        try {
+            userValidator.validateUserIsCompanyAdmin(companyInn, roles);
+            String userId = registerUserInCompany(companyInn, userDto);
+            assignRoleToUser(companyInn, userDto.getEmail(), role);
+            return userId;
+        } catch (RuntimeException e) {
+            keycloakService.removeUserByUsername(userDto.getEmail());
+            keycloakService.deleteRole(companyInn + role);
+            throw e;
+        }
     }
 
     public String registerDriver(String companyInn, UserDto userDto, Set<String> roles) {
@@ -71,6 +83,12 @@ public class UserService {
         String password = passwordService.generate();
         keycloakService.addPasswordByUsername(email, password);
         mailService.sendNewPasswordMail(email, password);
+    }
+
+    public UserDto getUserByUsername(String username) {
+        UserRepresentation userRepresentation = keycloakService.findUserByUsername(username)
+                .orElseThrow(() -> new KeycloakEntityNotFoundException(String.format("User %s not found", username)));
+        return userMapper.toDto(userRepresentation);
     }
 
     private String registerUserInCompany(String companyInn, UserDto userDto) {
