@@ -1,0 +1,65 @@
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/postgres
+    username: user
+    password: password
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+
+  mail:
+    host: smtp.yandex.ru
+    port: 465
+    username: noreplyonlinefly@yandex.ru
+    password: snopyhntzanrlhsr
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          connection-timeout: 5000
+          timeout: 5000
+          write-timeout: 5000
+  application:
+    name: portal-service
+
+  cloud:
+    discovery:
+      enabled: true
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://${services.registry.host}:${services.registry.port}/eureka/
+  instance:
+    prefer-ip-address: true
+
+services:
+  keycloak:
+    url: http://localhost:8080
+    realm: apprealm
+    client: app-client
+    client-secret: G9RVUvss9ctgzIdTggncqknKzCG1MxQN
+    username: admin
+    password: qwe123
+  registry:
+    host: localhost
+    port: 8761
+  dadata:
+    api-url: http://suggestions.dadata.ru
+    find-company-url: /suggestions/api/4_1/rs/findById/party
+    api-key: Token 9c1c583809d7f44ec165175ad3bb1e140afaeee2
+
+server:
+  port: 8082
